@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /assets/js/vendor/
+
+Sitemap: https://arquitetomariomartins.pages.dev/sitemap.xml
