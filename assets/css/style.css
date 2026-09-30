@@ -53,6 +53,7 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -62,12 +63,11 @@ body {
   line-height: 1.65;
   color: var(--text-primary);
   background-color: var(--bg-deep);
-  /* Atmosfera contínua — gradiente sutil, nunca cor chapada */
+  /* Atmosfera contínua — gradiente sutil, sem repintura por rolagem */
   background-image:
     radial-gradient(ellipse 80% 60% at 70% 10%, rgba(196,170,124,0.06) 0%, transparent 60%),
     radial-gradient(ellipse 60% 50% at 20% 90%, rgba(143,120,82,0.04) 0%, transparent 50%),
     linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-mid) 50%, var(--bg-deep) 100%);
-  background-attachment: fixed;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -194,14 +194,12 @@ button {
   left: 0;
   right: 0;
   z-index: 100;
-  padding: var(--space-xs) var(--space-sm);
+  padding: calc(var(--space-xs) + env(safe-area-inset-top, 0px)) calc(var(--space-sm) + env(safe-area-inset-right, 0px)) var(--space-xs) calc(var(--space-sm) + env(safe-area-inset-left, 0px));
   transition: background var(--dur) var(--ease-smooth), box-shadow var(--dur) var(--ease-smooth);
 }
 
 .site-header.scrolled {
-  background: rgba(10,9,8,0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(10,9,8,0.96);
   box-shadow: 0 1px 0 rgba(196,170,124,0.12);
 }
 
@@ -277,14 +275,15 @@ button {
   right: 0;
   width: min(85vw, 360px);
   height: 100dvh;
+  max-height: 100dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: none;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   gap: var(--space-md);
-  padding: var(--space-lg) var(--space-md);
-  background: rgba(10,9,8,0.97);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  padding: calc(var(--space-2xl) + env(safe-area-inset-top, 0px)) calc(var(--space-md) + env(safe-area-inset-right, 0px)) calc(var(--space-lg) + env(safe-area-inset-bottom, 0px)) var(--space-md);
+  background: rgba(10,9,8,0.98);
   border-left: 1px solid rgba(196,170,124,0.12);
   transform: translateX(100%);
   opacity: 0;
@@ -341,13 +340,13 @@ button {
     position: static;
     width: auto;
     height: auto;
+    max-height: none;
+    overflow-y: visible;
     flex-direction: row;
     align-items: center;
     gap: var(--space-sm);
     padding: 0;
     background: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
     border: none;
     transform: none;
     opacity: 1;
@@ -415,13 +414,13 @@ button {
 }
 
 @keyframes halo-breathe-1 {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50%      { opacity: 1;   transform: scale(1.08); }
+  0%, 100% { opacity: 0.65; }
+  50%      { opacity: 0.95; }
 }
 
 @keyframes halo-breathe-2 {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50%      { opacity: 0.9; transform: scale(1.05); }
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.8; }
 }
 
 .hero__content {
@@ -538,7 +537,6 @@ button {
   object-fit: cover;
   border-radius: 2px;
   border: 1px solid rgba(196, 170, 124, 0.22);
-  filter: brightness(0.96) contrast(1.04);
   box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.75), 0 0 28px -4px rgba(196, 170, 124, 0.08);
 }
 
@@ -710,6 +708,11 @@ button {
     rgba(196,170,124,0.20) 85%,
     transparent 100%
   );
+  transition: opacity 0.3s var(--ease-smooth);
+}
+
+.atuacao__item:hover .atuacao__fio {
+  opacity: 0.9;
 }
 
 /* ===================================================================
@@ -883,15 +886,14 @@ button {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(18, 16, 14, 0.75);
+  background: rgba(18, 16, 14, 0.92);
   border: 1px solid var(--gold-wire);
   color: var(--gold-light);
-  backdrop-filter: blur(6px);
   transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.3s;
 }
 
 .projeto-card:hover .projeto-card__btn-expand {
-  background: rgba(18, 16, 14, 0.95);
+  background: rgba(18, 16, 14, 0.98);
   border-color: var(--gold);
   color: var(--gold);
   transform: scale(1.08);
@@ -920,16 +922,14 @@ button {
 .projeto-modal__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(10, 9, 8, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(10, 9, 8, 0.96);
 }
 
 .projeto-modal__container {
   position: relative;
   z-index: 2;
   max-width: min(90vw, 860px);
-  max-height: min(90vh, 860px);
+  max-height: min(90dvh, 860px);
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
@@ -953,11 +953,10 @@ button {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: rgba(18, 16, 14, 0.85);
+  background: rgba(18, 16, 14, 0.95);
   border: 1px solid var(--gold-wire);
   color: var(--text-primary);
   cursor: pointer;
-  backdrop-filter: blur(8px);
   transition: border-color 0.25s, color 0.25s, transform 0.25s;
 }
 
@@ -1118,25 +1117,26 @@ body.modal-open {
    =================================================================== */
 html.js-ready [data-reveal] {
   opacity: 0;
-  will-change: transform, opacity;
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 html.js-ready [data-reveal="up"] {
-  transform: translateY(40px);
+  transform: translateY(32px);
 }
 
 html.js-ready [data-reveal="left"] {
-  transform: translateX(-40px);
+  transform: translateX(-32px);
 }
 
 html.js-ready [data-reveal="right"] {
-  transform: translateX(40px);
+  transform: translateX(32px);
 }
 
-/* Quando revelado pelo ScrollTrigger */
+/* Quando revelado pelo IntersectionObserver */
 [data-reveal].revealed {
   opacity: 1 !important;
   transform: none !important;
+  will-change: auto !important;
 }
 
 /* ===================================================================

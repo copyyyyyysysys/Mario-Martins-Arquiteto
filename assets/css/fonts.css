@@ -1,49 +1,22 @@
+/* ===================================================================
+   Mario Martins · Arquiteto — Fontes Otimizadas (Variáveis)
+   2 arquivos reais · Faixa de pesos declarada · font-display: swap
+   Outfit: 100-900 (14.808 B) | Plus Jakarta Sans: 200-800 (8.352 B)
+   Total: 2 requisições · 23.160 B
+   =================================================================== */
+
 @font-face {
   font-family: 'Outfit';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 100 900;
   font-display: swap;
   src: url('../fonts/outfit-400.woff2') format('woff2');
 }
-@font-face {
-  font-family: 'Outfit';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('../fonts/outfit-600.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Outfit';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('../fonts/outfit-700.woff2') format('woff2');
-}
+
 @font-face {
   font-family: 'Plus Jakarta Sans';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 200 800;
   font-display: swap;
   src: url('../fonts/plus-jakarta-sans-400.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Plus Jakarta Sans';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('../fonts/plus-jakarta-sans-500.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Plus Jakarta Sans';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('../fonts/plus-jakarta-sans-600.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Plus Jakarta Sans';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('../fonts/plus-jakarta-sans-700.woff2') format('woff2');
 }

@@ -1,59 +1,161 @@
 /* ===================================================================
-   Mario Martins · Arquiteto — Main JS
-   GSAP + ScrollTrigger + Lenis (v1)
-   Um único motor de scroll · Um único loop de renderização
-   Máximo 3 laços contínuos · Respeita prefers-reduced-motion
+   Mario Martins · Arquiteto — Main JS (Otimizado · Zero Dependências)
+   Sem GSAP · Sem ScrollTrigger · Sem Lenis
+   IntersectionObserver nativo · Rolagem nativa fluida · Zero RAF parado
+   Total: < 6 KB
    =================================================================== */
 
 (function () {
   'use strict';
 
-  // ---- Feature detection ----
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // ---- Detecção de movimento reduzido ----
+  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // ---- Mark JS active (enables reveal hide states in CSS) ----
+  // ---- Ativa classes de estado JS ----
   document.documentElement.classList.add('js-ready');
 
-  // ---- GSAP & ScrollTrigger registration ----
-  gsap.registerPlugin(ScrollTrigger);
+  // ---- Header & Scroll Sentinel ----
+  var header = document.getElementById('site-header');
 
-  // ---- Lenis smooth scroll ----
-  const lenis = new Lenis({
-    duration: 1.2,
-    easing: function (t) {
-      return Math.min(1, 1.001 - Math.pow(2, -10 * t));
-    },
-    orientation: 'vertical',
-    gestureOrientation: 'vertical',
-    smoothWheel: !prefersReducedMotion,
-    syncTouch: false,
-  });
+  // ---- Parallax & Scroll Elements ----
+  var heroSection = document.querySelector('.hero');
+  var heroContent = document.querySelector('.hero__content');
+  var heroHalo1 = document.querySelector('.hero__halo--1');
+  var heroHalo2 = document.querySelector('.hero__halo--2');
+  var heroScrollHint = document.querySelector('.hero__scroll-hint');
+  var sobreSection = document.querySelector('.sobre');
+  var sobreImg = document.querySelector('.sobre__img');
 
-  // Single render loop via GSAP ticker
-  gsap.ticker.add(function (time) {
-    lenis.raf(time * 1000);
-  });
-  gsap.ticker.lagSmoothing(0);
+  var isTicking = false;
+  var lastScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
 
-  // Connect Lenis → ScrollTrigger
-  lenis.on('scroll', ScrollTrigger.update);
+  function updateScrollState() {
+    var scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
 
-  // ---- Anchor links with Lenis ----
-  document.querySelectorAll('a[href^="#"]').forEach(function (link) {
-    link.addEventListener('click', function (e) {
-      var targetId = this.getAttribute('href');
-      if (targetId === '#') return;
-      var target = document.querySelector(targetId);
-      if (target) {
-        e.preventDefault();
-        lenis.scrollTo(target, { offset: -60, duration: 1.4 });
-        // Close mobile menu if open
-        closeMobileMenu();
+    // Estado do cabeçalho (scrolled > 60px)
+    if (header) {
+      if (scrollY > 60) {
+        if (!header.classList.contains('scrolled')) {
+          header.classList.add('scrolled');
+        }
+      } else {
+        if (header.classList.contains('scrolled')) {
+          header.classList.remove('scrolled');
+        }
+      }
+    }
+
+    // Parallax suave (apenas se prefersReducedMotion for falso)
+    if (!prefersReducedMotion) {
+      var vh = window.innerHeight;
+
+      // Parallax da Hero
+      if (heroSection && scrollY <= vh) {
+        var heroRatio = scrollY / vh;
+        if (heroContent) {
+          heroContent.style.transform = 'translateY(' + (-scrollY * 0.16).toFixed(1) + 'px)';
+          heroContent.style.opacity = Math.max(0.2, 1 - heroRatio * 0.9).toFixed(2);
+        }
+        if (heroHalo1) {
+          heroHalo1.style.transform = 'translateY(' + (-scrollY * 0.22).toFixed(1) + 'px)';
+        }
+        if (heroHalo2) {
+          heroHalo2.style.transform = 'translateY(' + (scrollY * 0.12).toFixed(1) + 'px)';
+        }
+        if (heroScrollHint) {
+          heroScrollHint.style.opacity = Math.max(0, 1 - scrollY / 140).toFixed(2);
+        }
+      }
+
+      // Parallax do Sobre (apenas quando visível)
+      if (sobreSection && sobreImg) {
+        var sRect = sobreSection.getBoundingClientRect();
+        if (sRect.top < vh && sRect.bottom > 0) {
+          var progress = (vh - sRect.top) / (vh + sRect.height);
+          var translateY = ((0.5 - progress) * 44).toFixed(1);
+          sobreImg.style.transform = 'translateY(' + translateY + 'px)';
+        }
+      }
+    }
+
+    isTicking = false;
+  }
+
+  function onScroll() {
+    if (!isTicking) {
+      isTicking = true;
+      requestAnimationFrame(updateScrollState);
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  // Chamada inicial para ajustar cabeçalho se recarregado com scroll
+  updateScrollState();
+
+  // ---- Scroll Reveal com IntersectionObserver ----
+  var revealEls = document.querySelectorAll('[data-reveal]');
+
+  if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+    // Redução de movimento ou navegador antigo: revela tudo imediatamente
+    revealEls.forEach(function (el) {
+      el.classList.add('revealed');
+    });
+  } else {
+    var vh = window.innerHeight;
+
+    var revealObserver = new IntersectionObserver(function (entries, observer) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var el = entry.target;
+          var delay = parseFloat(el.getAttribute('data-reveal-delay') || 0);
+          if (delay > 0) {
+            el.style.transitionDelay = delay + 's';
+          }
+          el.classList.add('revealed');
+          observer.unobserve(el);
+        }
+      });
+    }, {
+      root: null,
+      rootMargin: '0px 0px -40px 0px',
+      threshold: 0.08
+    });
+
+    revealEls.forEach(function (el) {
+      var rect = el.getBoundingClientRect();
+      // Se já está na primeira dobra no carregamento, revela direto sem atraso
+      if (rect.top < vh && rect.bottom > 0) {
+        el.classList.add('revealed');
+      } else {
+        revealObserver.observe(el);
       }
     });
-  });
+  }
 
-  // ---- Mobile menu ----
+  // ---- Pausar animações da hero quando fora da tela ----
+  if ('IntersectionObserver' in window && heroSection) {
+    var heroAtmosphere = heroSection.querySelector('.hero__atmosphere');
+    var scrollLine = heroSection.querySelector('.hero__scroll-line');
+
+    var heroObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var state = entry.isIntersecting ? 'running' : 'paused';
+        if (heroAtmosphere) {
+          var halos = heroAtmosphere.querySelectorAll('.hero__halo');
+          halos.forEach(function (h) {
+            h.style.animationPlayState = state;
+          });
+        }
+        if (scrollLine) {
+          scrollLine.style.animationPlayState = state;
+        }
+      });
+    }, { threshold: 0 });
+
+    heroObserver.observe(heroSection);
+  }
+
+  // ---- Menu Móvel com Acessibilidade ----
   var navToggle = document.getElementById('nav-toggle');
   var navMenu = document.getElementById('nav-menu');
   var backdrop = document.createElement('div');
@@ -62,216 +164,61 @@
   document.body.appendChild(backdrop);
 
   function openMobileMenu() {
+    if (!navToggle || !navMenu) return;
     navToggle.setAttribute('aria-expanded', 'true');
     navToggle.setAttribute('aria-label', 'Fechar menu');
     navMenu.classList.add('open');
     backdrop.classList.add('active');
     document.body.classList.add('menu-open');
-    lenis.stop();
   }
 
   function closeMobileMenu() {
+    if (!navToggle || !navMenu) return;
     navToggle.setAttribute('aria-expanded', 'false');
     navToggle.setAttribute('aria-label', 'Abrir menu');
     navMenu.classList.remove('open');
     backdrop.classList.remove('active');
     document.body.classList.remove('menu-open');
-    lenis.start();
   }
 
-  navToggle.addEventListener('click', function () {
-    var isOpen = this.getAttribute('aria-expanded') === 'true';
-    if (isOpen) {
-      closeMobileMenu();
-    } else {
-      openMobileMenu();
-    }
-  });
+  if (navToggle) {
+    navToggle.addEventListener('click', function () {
+      var isOpen = this.getAttribute('aria-expanded') === 'true';
+      if (isOpen) {
+        closeMobileMenu();
+      } else {
+        openMobileMenu();
+      }
+    });
+  }
 
   backdrop.addEventListener('click', closeMobileMenu);
 
-  // Escape closes menu
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') {
-      if (navToggle.getAttribute('aria-expanded') === 'true') {
+  // Fechar menu móvel ao clicar em âncora
+  document.querySelectorAll('.nav__link, a[href^="#"]').forEach(function (link) {
+    link.addEventListener('click', function () {
+      if (navToggle && navToggle.getAttribute('aria-expanded') === 'true') {
         closeMobileMenu();
-        navToggle.focus();
       }
-    }
-  });
-
-  // ---- Header scroll state ----
-  var header = document.getElementById('site-header');
-
-  ScrollTrigger.create({
-    trigger: document.body,
-    start: 'top -80',
-    onToggle: function (self) {
-      header.classList.toggle('scrolled', self.isActive);
-    },
-  });
-
-  // ---- Scroll Reveal ----
-  if (!prefersReducedMotion) {
-    var revealEls = document.querySelectorAll('[data-reveal]');
-
-    revealEls.forEach(function (el) {
-      var direction = el.getAttribute('data-reveal');
-      var delay = parseFloat(el.getAttribute('data-reveal-delay') || 0);
-
-      var fromVars = { opacity: 0, duration: 0.9, ease: 'power3.out', delay: delay };
-
-      if (direction === 'up') {
-        fromVars.y = 40;
-      } else if (direction === 'left') {
-        fromVars.x = -40;
-      } else if (direction === 'right') {
-        fromVars.x = 40;
-      }
-
-      fromVars.onComplete = function () {
-        el.classList.add('revealed');
-        el.style.willChange = 'auto';
-      };
-
-      ScrollTrigger.create({
-        trigger: el,
-        start: 'top 88%',
-        once: true,
-        invalidateOnRefresh: true,
-        onEnter: function () {
-          gsap.from(el, fromVars);
-        },
-      });
-    });
-  } else {
-    // reduced motion: make everything visible immediately
-    document.querySelectorAll('[data-reveal]').forEach(function (el) {
-      el.classList.add('revealed');
-    });
-  }
-
-  // ---- Hero parallax layers ----
-  if (!prefersReducedMotion) {
-    var heroContent = document.querySelector('.hero__content');
-    var heroHalo1 = document.querySelector('.hero__halo--1');
-    var heroHalo2 = document.querySelector('.hero__halo--2');
-    var heroScrollHint = document.querySelector('.hero__scroll-hint');
-
-    if (heroContent) {
-      gsap.to(heroContent, {
-        y: -60,
-        opacity: 0.3,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '.hero',
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-          invalidateOnRefresh: true,
-        },
-      });
-    }
-
-    if (heroHalo1) {
-      gsap.to(heroHalo1, {
-        y: -80,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '.hero',
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-          invalidateOnRefresh: true,
-        },
-      });
-    }
-
-    if (heroHalo2) {
-      gsap.to(heroHalo2, {
-        y: 40,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '.hero',
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-          invalidateOnRefresh: true,
-        },
-      });
-    }
-
-    if (heroScrollHint) {
-      gsap.to(heroScrollHint, {
-        opacity: 0,
-        y: -20,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '.hero',
-          start: 'top top',
-          end: '30% top',
-          scrub: true,
-          invalidateOnRefresh: true,
-        },
-      });
-    }
-  }
-
-  // ---- Sobre section parallax ----
-  if (!prefersReducedMotion) {
-    var sobreImg = document.querySelector('.sobre__img');
-    if (sobreImg) {
-      gsap.fromTo(sobreImg, { y: 30 }, {
-        y: -30,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '.sobre',
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: true,
-          invalidateOnRefresh: true,
-        },
-      });
-    }
-  }
-
-  // ---- Atuação items hover glow line ----
-  var atuacaoFios = document.querySelectorAll('.atuacao__fio');
-  atuacaoFios.forEach(function (fio) {
-    var item = fio.parentElement;
-    item.addEventListener('mouseenter', function () {
-      gsap.to(fio, {
-        background: 'linear-gradient(90deg, transparent 0%, rgba(196,170,124,0.45) 20%, rgba(196,170,124,0.45) 80%, transparent 100%)',
-        duration: 0.4,
-        overwrite: true,
-      });
-    });
-    item.addEventListener('mouseleave', function () {
-      gsap.to(fio, {
-        background: 'linear-gradient(90deg, transparent 0%, rgba(196,170,124,0.20) 20%, rgba(196,170,124,0.20) 80%, transparent 100%)',
-        duration: 0.6,
-        overwrite: true,
-      });
     });
   });
 
-  // ---- Modal de Projeto (Lightbox) ----
+  // ---- Modal de Projeto (Lightbox com Zero Upscale) ----
   var projetoModal = document.getElementById('projeto-modal');
   var projetoModalImg = document.getElementById('projeto-modal-img');
   var projetoModalClose = document.getElementById('projeto-modal-close');
   var projetoModalBackdrop = document.getElementById('projeto-modal-backdrop');
-  var lastTrigger = null;
+  var lastFocusedTrigger = null;
 
   function openProjetoModal(trigger) {
     if (!projetoModal || !projetoModalImg) return;
-    lastTrigger = trigger;
+    lastFocusedTrigger = trigger;
     var src = trigger.getAttribute('data-src');
     var alt = trigger.getAttribute('data-alt');
     projetoModalImg.setAttribute('src', src);
-    projetoModalImg.setAttribute('alt', alt);
+    projetoModalImg.setAttribute('alt', alt || 'Projeto em destaque');
     projetoModal.removeAttribute('hidden');
     document.body.classList.add('modal-open');
-    lenis.stop();
     if (projetoModalClose) {
       projetoModalClose.focus();
     }
@@ -285,10 +232,9 @@
       projetoModalImg.setAttribute('src', '');
       projetoModalImg.setAttribute('alt', '');
     }
-    lenis.start();
-    if (lastTrigger) {
-      lastTrigger.focus();
-      lastTrigger = null;
+    if (lastFocusedTrigger) {
+      lastFocusedTrigger.focus();
+      lastFocusedTrigger = null;
     }
   }
 
@@ -306,7 +252,7 @@
     projetoModalBackdrop.addEventListener('click', closeProjetoModal);
   }
 
-  // Escape fecha modal ou menu móvel
+  // Tecla Escape para fechar modal ou menu
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       if (projetoModal && !projetoModal.hasAttribute('hidden')) {
@@ -318,36 +264,13 @@
     }
   });
 
-  // ---- Pause continuous animations when tab is hidden ----
-  // (CSS animations + halos are the 3 continuous loops max)
+  // ---- Pausar animações contínuas ao ocultar a aba ----
   var continuousAnimEls = document.querySelectorAll('.hero__halo, .btn__sweep, .hero__scroll-line');
   document.addEventListener('visibilitychange', function () {
     var paused = document.hidden;
     continuousAnimEls.forEach(function (el) {
       el.style.animationPlayState = paused ? 'paused' : 'running';
     });
-  });
-
-  // ---- ScrollTrigger.refresh() — mandatory ----
-  // After load
-  window.addEventListener('load', function () {
-    ScrollTrigger.refresh();
-  });
-
-  // After fonts ready
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(function () {
-      ScrollTrigger.refresh();
-    });
-  }
-
-  // On resize (debounced)
-  var resizeTimer;
-  window.addEventListener('resize', function () {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () {
-      ScrollTrigger.refresh();
-    }, 250);
   });
 
 })();
