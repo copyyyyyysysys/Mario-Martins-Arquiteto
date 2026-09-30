@@ -1,6 +1,5 @@
 /* ===================================================================
    Mario Martins · Arquiteto — Main JS (Otimizado · Zero Dependências)
-   Sem GSAP · Sem ScrollTrigger · Sem Lenis
    IntersectionObserver nativo · Rolagem nativa fluida · Zero RAF parado
    Total: < 6 KB
    =================================================================== */
@@ -10,9 +9,6 @@
 
   // ---- Detecção de movimento reduzido ----
   var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // ---- Ativa classes de estado JS ----
-  document.documentElement.classList.add('js-ready');
 
   // ---- Header & Scroll Sentinel ----
   var header = document.getElementById('site-header');
@@ -92,45 +88,6 @@
   // Chamada inicial para ajustar cabeçalho se recarregado com scroll
   updateScrollState();
 
-  // ---- Scroll Reveal com IntersectionObserver ----
-  var revealEls = document.querySelectorAll('[data-reveal]');
-
-  if (prefersReducedMotion || !('IntersectionObserver' in window)) {
-    // Redução de movimento ou navegador antigo: revela tudo imediatamente
-    revealEls.forEach(function (el) {
-      el.classList.add('revealed');
-    });
-  } else {
-    var vh = window.innerHeight;
-
-    var revealObserver = new IntersectionObserver(function (entries, observer) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          var el = entry.target;
-          var delay = parseFloat(el.getAttribute('data-reveal-delay') || 0);
-          if (delay > 0) {
-            el.style.transitionDelay = delay + 's';
-          }
-          el.classList.add('revealed');
-          observer.unobserve(el);
-        }
-      });
-    }, {
-      root: null,
-      rootMargin: '0px 0px -40px 0px',
-      threshold: 0.08
-    });
-
-    revealEls.forEach(function (el) {
-      var rect = el.getBoundingClientRect();
-      // Se já está na primeira dobra no carregamento, revela direto sem atraso
-      if (rect.top < vh && rect.bottom > 0) {
-        el.classList.add('revealed');
-      } else {
-        revealObserver.observe(el);
-      }
-    });
-  }
 
   // ---- Pausar animações da hero quando fora da tela ----
   if ('IntersectionObserver' in window && heroSection) {
