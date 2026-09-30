@@ -526,6 +526,7 @@ button {
 .sobre__media {
   position: relative;
   max-width: 420px;
+  width: 100%;
   justify-self: center;
 }
 
@@ -533,22 +534,31 @@ button {
   width: 100%;
   max-width: 420px;
   height: auto;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
-  filter: brightness(0.95) contrast(1.04);
+  border-radius: 2px;
+  border: 1px solid rgba(196, 170, 124, 0.22);
+  filter: brightness(0.96) contrast(1.04);
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.7), 0 0 24px -4px rgba(196, 170, 124, 0.08);
 }
 
 /* Halo de luz atrás da foto */
 .sobre__img-glow {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle, rgba(196,170,124,0.12) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(196, 170, 124, 0.14) 0%, transparent 70%);
   z-index: -1;
   pointer-events: none;
 }
 
-.sobre__text {
-  max-width: 520px;
+.sobre__content {
+  max-width: 640px;
   justify-self: center;
+  width: 100%;
+}
+
+.sobre__header {
+  margin-bottom: var(--space-md);
 }
 
 .sobre__label {
@@ -558,44 +568,118 @@ button {
   letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--gold);
-  margin-bottom: var(--space-sm);
+  margin-bottom: var(--space-xs);
 }
 
 .sobre__lead {
   font-family: var(--ff-display);
-  font-size: clamp(1.5rem, 2vw + 0.5rem, 2rem);
+  font-size: clamp(1.4rem, 2vw + 0.5rem, 2rem);
   font-weight: 600;
   line-height: 1.25;
   color: var(--text-primary);
-  margin-bottom: var(--space-xs);
+  margin-bottom: 0.6rem;
 }
 
-.sobre__body {
-  font-size: clamp(0.938rem, 0.5vw + 0.8rem, 1rem);
-  color: var(--text-secondary);
-  line-height: 1.7;
+.sobre__anchor {
+  font-family: var(--ff-body);
+  font-size: clamp(0.95rem, 0.4vw + 0.8rem, 1.063rem);
+  font-weight: 500;
+  color: var(--gold-light);
+  line-height: 1.4;
+  margin-bottom: var(--space-xs);
 }
 
 /* Fio de luz horizontal */
 .sobre__fio {
   width: 64px;
   height: 1px;
-  margin-top: var(--space-sm);
+  margin-top: var(--space-xs);
   background: linear-gradient(90deg, var(--gold) 0%, transparent 100%);
 }
 
-@media (min-width: 768px) {
+/* As quatro frentes estruturadas */
+.sobre__frentes {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xs);
+}
+
+.sobre__frente {
+  position: relative;
+  background-color: var(--bg-surface);
+  border: 1px solid rgba(196, 170, 124, 0.20);
+  border-radius: 2px;
+  padding: clamp(0.85rem, 1.2vw, 1.1rem);
+  transition: border-color 0.3s var(--ease-smooth), transform 0.3s var(--ease-smooth), box-shadow 0.3s var(--ease-smooth);
+  overflow: hidden;
+}
+
+/* Fio de luz no topo de cada card */
+.sobre__frente::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(196, 170, 124, 0.35) 50%, transparent 100%);
+  pointer-events: none;
+}
+
+.sobre__frente:hover {
+  border-color: rgba(196, 170, 124, 0.42);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.5), 0 0 16px -2px rgba(196, 170, 124, 0.08);
+}
+
+.sobre__frente-num {
+  display: block;
+  font-family: var(--ff-body);
+  font-size: 0.688rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  margin-bottom: 0.25rem;
+}
+
+.sobre__frente-title {
+  font-family: var(--ff-display);
+  font-size: clamp(1.05rem, 0.8vw + 0.75rem, 1.2rem);
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin-bottom: 0.3rem;
+}
+
+.sobre__frente-desc {
+  font-family: var(--ff-body);
+  font-size: clamp(0.813rem, 0.2vw + 0.75rem, 0.875rem);
+  line-height: 1.45;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+@media (min-width: 540px) {
+  .sobre__frentes {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-xs);
+  }
+}
+
+@media (min-width: 900px) {
   .sobre__inner {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-lg);
+    grid-template-columns: minmax(320px, 420px) 1fr;
+    gap: var(--space-xl);
   }
 
   .sobre__media {
     justify-self: end;
   }
 
-  .sobre__text {
+  .sobre__content {
     justify-self: start;
+    max-width: 640px;
   }
 }
 
