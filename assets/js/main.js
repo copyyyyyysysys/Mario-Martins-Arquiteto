@@ -255,6 +255,69 @@
     });
   });
 
+  // ---- Modal de Projeto (Lightbox) ----
+  var projetoModal = document.getElementById('projeto-modal');
+  var projetoModalImg = document.getElementById('projeto-modal-img');
+  var projetoModalClose = document.getElementById('projeto-modal-close');
+  var projetoModalBackdrop = document.getElementById('projeto-modal-backdrop');
+  var lastTrigger = null;
+
+  function openProjetoModal(trigger) {
+    if (!projetoModal || !projetoModalImg) return;
+    lastTrigger = trigger;
+    var src = trigger.getAttribute('data-src');
+    var alt = trigger.getAttribute('data-alt');
+    projetoModalImg.setAttribute('src', src);
+    projetoModalImg.setAttribute('alt', alt);
+    projetoModal.removeAttribute('hidden');
+    document.body.classList.add('modal-open');
+    lenis.stop();
+    if (projetoModalClose) {
+      projetoModalClose.focus();
+    }
+  }
+
+  function closeProjetoModal() {
+    if (!projetoModal || projetoModal.hasAttribute('hidden')) return;
+    projetoModal.setAttribute('hidden', '');
+    document.body.classList.remove('modal-open');
+    if (projetoModalImg) {
+      projetoModalImg.setAttribute('src', '');
+      projetoModalImg.setAttribute('alt', '');
+    }
+    lenis.start();
+    if (lastTrigger) {
+      lastTrigger.focus();
+      lastTrigger = null;
+    }
+  }
+
+  document.querySelectorAll('.projeto-card__trigger').forEach(function (trigger) {
+    trigger.addEventListener('click', function () {
+      openProjetoModal(this);
+    });
+  });
+
+  if (projetoModalClose) {
+    projetoModalClose.addEventListener('click', closeProjetoModal);
+  }
+
+  if (projetoModalBackdrop) {
+    projetoModalBackdrop.addEventListener('click', closeProjetoModal);
+  }
+
+  // Escape fecha modal ou menu móvel
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      if (projetoModal && !projetoModal.hasAttribute('hidden')) {
+        closeProjetoModal();
+      } else if (navToggle && navToggle.getAttribute('aria-expanded') === 'true') {
+        closeMobileMenu();
+        navToggle.focus();
+      }
+    }
+  });
+
   // ---- Pause continuous animations when tab is hidden ----
   // (CSS animations + halos are the 3 continuous loops max)
   var continuousAnimEls = document.querySelectorAll('.hero__halo, .btn__sweep, .hero__scroll-line');

@@ -277,7 +277,7 @@ button {
   right: 0;
   width: min(85vw, 360px);
   height: 100dvh;
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: center;
   gap: var(--space-md);
@@ -297,6 +297,7 @@ button {
 }
 
 .nav__menu.open {
+  display: flex;
   transform: translateX(0);
   opacity: 1;
   visibility: visible;
@@ -396,19 +397,19 @@ button {
 }
 
 .hero__halo--1 {
-  width: clamp(300px, 60vw, 700px);
-  height: clamp(300px, 60vw, 700px);
-  top: -10%;
-  right: -15%;
+  width: clamp(280px, 45vw, 600px);
+  height: clamp(280px, 45vw, 600px);
+  top: 0;
+  right: 0;
   background: radial-gradient(circle, rgba(196,170,124,0.10) 0%, transparent 70%);
   animation: halo-breathe-1 8s ease-in-out infinite;
 }
 
 .hero__halo--2 {
-  width: clamp(200px, 40vw, 500px);
-  height: clamp(200px, 40vw, 500px);
+  width: clamp(200px, 35vw, 450px);
+  height: clamp(200px, 35vw, 450px);
   bottom: 5%;
-  left: -10%;
+  left: 0;
   background: radial-gradient(circle, rgba(184,154,106,0.07) 0%, transparent 70%);
   animation: halo-breathe-2 10s ease-in-out infinite 2s;
 }
@@ -539,8 +540,8 @@ button {
 /* Halo de luz atrás da foto */
 .sobre__img-glow {
   position: absolute;
-  inset: -12%;
-  background: radial-gradient(circle, rgba(196,170,124,0.12) 0%, transparent 65%);
+  inset: 0;
+  background: radial-gradient(circle, rgba(196,170,124,0.12) 0%, transparent 70%);
   z-index: -1;
   pointer-events: none;
 }
@@ -671,6 +672,317 @@ button {
     rgba(196,170,124,0.20) 80%,
     transparent 100%
   );
+}
+
+/* ===================================================================
+   PROJETOS (PORTFÓLIO AUTORAL)
+   Uniformidade métrica rigorosa: proporção 1:1, mesmo tamanho,
+   sem caixa cinza, sem letterbox, preenchimento total.
+   =================================================================== */
+.projetos {
+  position: relative;
+  padding: var(--space-2xl) var(--space-sm) var(--space-xl);
+  overflow: hidden;
+}
+
+.projetos__atmosphere {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.projetos__halo {
+  position: absolute;
+  top: 15%;
+  left: 5%;
+  right: 5%;
+  width: 90%;
+  max-width: 900px;
+  margin: 0 auto;
+  height: 500px;
+  background: radial-gradient(ellipse at center, rgba(196,170,124,0.07) 0%, transparent 68%);
+}
+
+.projetos__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.projetos__header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto var(--space-xl);
+}
+
+.projetos__label {
+  font-family: var(--ff-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: var(--space-xs);
+}
+
+.projetos__title {
+  font-family: var(--ff-display);
+  font-size: clamp(2rem, 3.5vw + 0.5rem, 3.25rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.projetos__lead {
+  font-size: clamp(0.938rem, 0.5vw + 0.8rem, 1.063rem);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Grade de cards rigorosamente uniforme */
+.projetos__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+@media (min-width: 640px) {
+  .projetos__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .projetos__grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-lg);
+  }
+}
+
+/* Card individual: proporção 1:1 absoluta */
+.projeto-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--bg-surface);
+  border: 1px solid var(--gold-wire);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.4s var(--ease-smooth);
+}
+
+.projeto-card:hover,
+.projeto-card:focus-within {
+  border-color: rgba(196, 170, 124, 0.45);
+}
+
+/* Botão que engloba a mídia para acessibilidade interativa */
+.projeto-card__trigger {
+  all: unset;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  position: relative;
+}
+
+.projeto-card__trigger:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.projeto-card__media {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+/* Imagem normalizada em 1:1, preenche 100% sem corte no CSS e sem faixa vazia */
+.projeto-card__img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.001);
+  transition: transform 0.6s var(--ease-smooth);
+}
+
+.projeto-card:hover .projeto-card__img {
+  transform: scale(1.035);
+}
+
+/* Overlay sutil que NÃO esconde a foto nem apaga o imóvel */
+.projeto-card__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: var(--space-sm);
+  background: linear-gradient(180deg, transparent 65%, rgba(10, 9, 8, 0.35) 100%);
+  opacity: 0.8;
+  transition: opacity 0.4s var(--ease-smooth);
+}
+
+.projeto-card:hover .projeto-card__overlay {
+  opacity: 1;
+}
+
+/* Botão discreto no canto para indicar ação de ampliação */
+.projeto-card__btn-expand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(18, 16, 14, 0.75);
+  border: 1px solid var(--gold-wire);
+  color: var(--gold-light);
+  backdrop-filter: blur(6px);
+  transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.3s;
+}
+
+.projeto-card:hover .projeto-card__btn-expand {
+  background: rgba(18, 16, 14, 0.95);
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: scale(1.08);
+}
+
+/* Chamada de ação pós-portfólio */
+.projetos__cta-wrap {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  position: relative;
+}
+
+.projetos__cta-text {
+  font-family: var(--ff-display);
+  font-size: clamp(1.125rem, 1.2vw + 0.5rem, 1.375rem);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.btn--projetos {
+  font-size: 0.938rem;
+  padding: 0.95em 2em;
+}
+
+/* ===================================================================
+   MODAL / LIGHTBOX
+   Zero upscale, foco acessível, Escape para fechar, trava de scroll
+   =================================================================== */
+.projeto-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm);
+}
+
+.projeto-modal[hidden] {
+  display: none;
+}
+
+.projeto-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 9, 8, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.projeto-modal__container {
+  position: relative;
+  z-index: 2;
+  max-width: min(90vw, 860px);
+  max-height: min(90vh, 860px);
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--gold-wire);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(196, 170, 124, 0.12);
+}
+
+.projeto-modal__close {
+  all: unset;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(18, 16, 14, 0.85);
+  border: 1px solid var(--gold-wire);
+  color: var(--text-primary);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: border-color 0.25s, color 0.25s, transform 0.25s;
+}
+
+.projeto-modal__close:hover,
+.projeto-modal__close:focus-visible {
+  border-color: var(--gold);
+  color: var(--gold-light);
+  transform: scale(1.08);
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.projeto-modal__media {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.projeto-modal__img {
+  width: 100%;
+  height: 100%;
+  max-width: 959px;
+  max-height: 959px;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  display: block;
+}
+
+body.menu-open,
+body.modal-open {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projeto-card__img,
+  .projeto-card__btn-expand,
+  .projeto-modal__close {
+    transition: none !important;
+    transform: none !important;
+  }
 }
 
 /* ===================================================================
